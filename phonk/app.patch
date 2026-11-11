@@ -1,0 +1,604 @@
+diff --git a/androidApp/build.gradle.kts b/androidApp/build.gradle.kts
+index cbafbb79..4f4d2564 100644
+--- a/androidApp/build.gradle.kts
++++ b/androidApp/build.gradle.kts
+@@ -20,7 +20,8 @@ android {
+     compileSdk = 37
+ 
+     defaultConfig {
+-        applicationId = "com.maxrave.simpmusic"
++        // Phonk Hub: own package, so it installs beside SimpMusic and keeps its own data
++        applicationId = "com.phonkhub.app"
+         minSdk = 26
+         targetSdk = 36
+         versionCode =
+diff --git a/androidApp/src/main/AndroidManifest.xml b/androidApp/src/main/AndroidManifest.xml
+index 1a3a3552..e2582e28 100644
+--- a/androidApp/src/main/AndroidManifest.xml
++++ b/androidApp/src/main/AndroidManifest.xml
+@@ -299,6 +299,7 @@
+         <!-- Quick Settings tile: a shortcut to the song recognition sheet (simpmusic://recognize). -->
+         <service
+             android:name=".service.RecognitionTileService"
++            android:enabled="false"
+             android:exported="true"
+             android:icon="@drawable/rounded_graphic_eq_24"
+             android:label="@string/qs_tile_recognize_song"
+diff --git a/androidApp/src/main/res/drawable/mono.xml b/androidApp/src/main/res/drawable/mono.xml
+index 14530e02..3e7c7a75 100644
+--- a/androidApp/src/main/res/drawable/mono.xml
++++ b/androidApp/src/main/res/drawable/mono.xml
+@@ -1,10 +1,17 @@
+-<vector android:height="48dp"
+-    android:viewportHeight="258"
+-    android:viewportWidth="258"
++<?xml version="1.0" encoding="utf-8"?>
++<!-- Phonk Hub: one-colour logo (music note), used for notifications and badges -->
++<vector xmlns:android="http://schemas.android.com/apk/res/android"
+     android:width="48dp"
+-    xmlns:android="http://schemas.android.com/apk/res/android">
+-    <path
+-        android:fillColor="#0AEAF8"
+-        android:fillType="evenOdd"
+-        android:pathData="M99.31,44.39C96.16,45.4 93.66,47.53 92.45,50.22L91.76,51.75L91.85,85.31C91.89,103.77 92,119.14 92.1,119.46C92.23,119.92 92.16,119.99 91.7,119.81C91.39,119.69 90.11,119.31 88.86,118.98C79.63,116.51 69.09,120.14 64.8,127.25C60.78,133.93 63.25,144.73 69.98,149.85C73.86,152.81 78.96,154.79 85.69,155.97C88.78,156.51 90.85,156.67 95.37,156.69C100.7,156.71 101.29,156.66 103.25,155.98C108.71,154.09 112.59,149.92 114.06,144.38C114.82,141.47 114.82,141.47 114.49,107.82C114.32,90.1 114.33,80.89 114.52,80.89C114.69,80.89 122.51,84.34 131.9,88.56C141.29,92.77 151.7,97.43 155.03,98.9C158.36,100.37 163.27,102.54 165.93,103.71L170.78,105.85L171,109.77C171.21,113.48 172.17,153.92 172.04,153.98C172.01,154 168.04,155.63 163.21,157.6C158.38,159.58 154.02,161.39 153.52,161.62C152.57,162.05 130.36,171.23 117.74,176.41C98.34,184.38 93.12,186.6 91.56,187.55C87.14,190.25 84.07,194.61 83.79,198.61C83.43,203.71 86.45,207.87 92.6,210.73C96.36,212.48 99.39,213.14 103.55,213.12C106.96,213.1 107.46,213.02 111.73,211.72C117.89,209.85 149.32,200.53 161.02,197.11C184.2,190.32 184.98,190.05 188.2,187.5C191.07,185.23 193.02,182.36 194.08,178.83C194.54,177.3 194.59,173.79 194.55,137.89C194.54,116.3 194.4,97.14 194.25,95.32C193.86,90.42 192.99,88.38 189.96,85.23C188.54,83.75 187.54,83.15 181.68,80.27C175.22,77.1 165.59,72.45 160.33,69.96C158.91,69.3 156.12,67.97 154.12,67.01C152.12,66.05 149.53,64.81 148.37,64.26C145.31,62.81 136.67,58.7 121.11,51.29C113.62,47.72 106.89,44.61 106.15,44.38C104.5,43.87 100.93,43.88 99.31,44.39Z" />
++    android:height="48dp"
++    android:viewportWidth="258"
++    android:viewportHeight="258">
++    <group
++        android:scaleX="2.3889"
++        android:scaleY="2.3889"
++        android:translateX="-16.7"
++        android:translateY="-4.8">
++        <path
++            android:fillColor="#FF9900"
++            android:pathData="M60,28 L66,28 C67,35 72,39 78,43 C83,46 85,52 83,58 C82,61 80,63 78,64 C80,57 77,51 70,49 L66,48 L66,72 C66,80 58,85 50,85 C42,85 37,80 37,74 C37,67 44,62 52,62 C55,62 58,63 60,64 Z" />
++    </group>
+ </vector>
+diff --git a/androidApp/src/main/res/drawable/monochrome.xml b/androidApp/src/main/res/drawable/monochrome.xml
+index eccabaea..f8d0ed36 100644
+--- a/androidApp/src/main/res/drawable/monochrome.xml
++++ b/androidApp/src/main/res/drawable/monochrome.xml
+@@ -1,10 +1,15 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!-- Phonk Hub: one-colour logo (music note), used for themed icons and badges -->
+ <vector xmlns:android="http://schemas.android.com/apk/res/android"
+     android:width="108dp"
+     android:height="108dp"
+     android:viewportWidth="108"
+     android:viewportHeight="108">
+-  <path
+-      android:pathData="M46.58,32.85C45.79,33.1 45.16,33.63 44.86,34.31L44.69,34.69L44.71,43.08C44.72,47.69 44.75,51.53 44.77,51.61C44.81,51.73 44.79,51.75 44.67,51.7C44.6,51.67 44.28,51.58 43.97,51.49C41.66,50.88 39.02,51.78 37.95,53.56C36.94,55.23 37.56,57.93 39.24,59.21C40.22,59.95 41.49,60.45 43.17,60.74C43.94,60.88 44.46,60.92 45.59,60.92C46.93,60.93 47.07,60.91 47.56,60.74C48.93,60.27 49.9,59.23 50.26,57.84C50.46,57.12 50.46,57.12 50.37,48.7C50.33,44.28 50.33,41.97 50.38,41.97C50.42,41.97 52.38,42.83 54.72,43.89C57.07,44.94 59.67,46.11 60.51,46.48C61.34,46.84 62.57,47.38 63.23,47.68L64.44,48.21L64.5,49.19C64.55,50.12 64.79,60.23 64.76,60.25C64.75,60.25 63.76,60.66 62.55,61.15C61.34,61.65 60.25,62.1 60.13,62.15C59.89,62.26 54.34,64.56 51.18,65.85C46.33,67.84 45.03,68.4 44.64,68.64C43.53,69.31 42.77,70.4 42.7,71.4C42.61,72.68 43.36,73.72 44.9,74.43C45.84,74.87 46.6,75.04 47.64,75.03C48.49,75.03 48.62,75 49.68,74.68C51.22,74.21 59.08,71.88 62.01,71.03C67.8,69.33 67.99,69.26 68.8,68.63C69.52,68.06 70,67.34 70.27,66.46C70.39,66.07 70.4,65.2 70.39,56.22C70.38,50.82 70.35,46.03 70.31,45.58C70.21,44.35 70,43.85 69.24,43.06C68.88,42.69 68.63,42.54 67.17,41.82C65.55,41.02 63.15,39.86 61.83,39.24C61.48,39.07 60.78,38.74 60.28,38.5C59.78,38.26 59.13,37.95 58.84,37.82C58.08,37.45 55.92,36.42 52.03,34.57C50.15,33.68 48.47,32.9 48.29,32.85C47.88,32.72 46.98,32.72 46.58,32.85Z"
+-      android:fillColor="#000000"
+-      android:fillType="evenOdd" />
++    <group
++        android:translateX="-7"
++        android:translateY="-2">
++        <path
++            android:fillColor="#FFFFFFFF"
++            android:pathData="M60,28 L66,28 C67,35 72,39 78,43 C83,46 85,52 83,58 C82,61 80,63 78,64 C80,57 77,51 70,49 L66,48 L66,72 C66,80 58,85 50,85 C42,85 37,80 37,74 C37,67 44,62 52,62 C55,62 58,63 60,64 Z" />
++    </group>
+ </vector>
+diff --git a/androidApp/src/main/res/values/phonk_icon_color.xml b/androidApp/src/main/res/values/phonk_icon_color.xml
+new file mode 100644
+index 00000000..1e922559
+--- /dev/null
++++ b/androidApp/src/main/res/values/phonk_icon_color.xml
+@@ -0,0 +1,4 @@
++<?xml version="1.0" encoding="utf-8"?>
++<resources>
++    <color name="phonk_icon_background">#151931</color>
++</resources>
+diff --git a/composeApp/src/commonMain/composeResources/drawable/mono.xml b/composeApp/src/commonMain/composeResources/drawable/mono.xml
+index 14530e02..3e7c7a75 100644
+--- a/composeApp/src/commonMain/composeResources/drawable/mono.xml
++++ b/composeApp/src/commonMain/composeResources/drawable/mono.xml
+@@ -1,10 +1,17 @@
+-<vector android:height="48dp"
+-    android:viewportHeight="258"
+-    android:viewportWidth="258"
++<?xml version="1.0" encoding="utf-8"?>
++<!-- Phonk Hub: one-colour logo (music note), used for notifications and badges -->
++<vector xmlns:android="http://schemas.android.com/apk/res/android"
+     android:width="48dp"
+-    xmlns:android="http://schemas.android.com/apk/res/android">
+-    <path
+-        android:fillColor="#0AEAF8"
+-        android:fillType="evenOdd"
+-        android:pathData="M99.31,44.39C96.16,45.4 93.66,47.53 92.45,50.22L91.76,51.75L91.85,85.31C91.89,103.77 92,119.14 92.1,119.46C92.23,119.92 92.16,119.99 91.7,119.81C91.39,119.69 90.11,119.31 88.86,118.98C79.63,116.51 69.09,120.14 64.8,127.25C60.78,133.93 63.25,144.73 69.98,149.85C73.86,152.81 78.96,154.79 85.69,155.97C88.78,156.51 90.85,156.67 95.37,156.69C100.7,156.71 101.29,156.66 103.25,155.98C108.71,154.09 112.59,149.92 114.06,144.38C114.82,141.47 114.82,141.47 114.49,107.82C114.32,90.1 114.33,80.89 114.52,80.89C114.69,80.89 122.51,84.34 131.9,88.56C141.29,92.77 151.7,97.43 155.03,98.9C158.36,100.37 163.27,102.54 165.93,103.71L170.78,105.85L171,109.77C171.21,113.48 172.17,153.92 172.04,153.98C172.01,154 168.04,155.63 163.21,157.6C158.38,159.58 154.02,161.39 153.52,161.62C152.57,162.05 130.36,171.23 117.74,176.41C98.34,184.38 93.12,186.6 91.56,187.55C87.14,190.25 84.07,194.61 83.79,198.61C83.43,203.71 86.45,207.87 92.6,210.73C96.36,212.48 99.39,213.14 103.55,213.12C106.96,213.1 107.46,213.02 111.73,211.72C117.89,209.85 149.32,200.53 161.02,197.11C184.2,190.32 184.98,190.05 188.2,187.5C191.07,185.23 193.02,182.36 194.08,178.83C194.54,177.3 194.59,173.79 194.55,137.89C194.54,116.3 194.4,97.14 194.25,95.32C193.86,90.42 192.99,88.38 189.96,85.23C188.54,83.75 187.54,83.15 181.68,80.27C175.22,77.1 165.59,72.45 160.33,69.96C158.91,69.3 156.12,67.97 154.12,67.01C152.12,66.05 149.53,64.81 148.37,64.26C145.31,62.81 136.67,58.7 121.11,51.29C113.62,47.72 106.89,44.61 106.15,44.38C104.5,43.87 100.93,43.88 99.31,44.39Z" />
++    android:height="48dp"
++    android:viewportWidth="258"
++    android:viewportHeight="258">
++    <group
++        android:scaleX="2.3889"
++        android:scaleY="2.3889"
++        android:translateX="-16.7"
++        android:translateY="-4.8">
++        <path
++            android:fillColor="#FF9900"
++            android:pathData="M60,28 L66,28 C67,35 72,39 78,43 C83,46 85,52 83,58 C82,61 80,63 78,64 C80,57 77,51 70,49 L66,48 L66,72 C66,80 58,85 50,85 C42,85 37,80 37,74 C37,67 44,62 52,62 C55,62 58,63 60,64 Z" />
++    </group>
+ </vector>
+diff --git a/composeApp/src/commonMain/composeResources/drawable/monochrome.xml b/composeApp/src/commonMain/composeResources/drawable/monochrome.xml
+index eccabaea..f8d0ed36 100644
+--- a/composeApp/src/commonMain/composeResources/drawable/monochrome.xml
++++ b/composeApp/src/commonMain/composeResources/drawable/monochrome.xml
+@@ -1,10 +1,15 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!-- Phonk Hub: one-colour logo (music note), used for themed icons and badges -->
+ <vector xmlns:android="http://schemas.android.com/apk/res/android"
+     android:width="108dp"
+     android:height="108dp"
+     android:viewportWidth="108"
+     android:viewportHeight="108">
+-  <path
+-      android:pathData="M46.58,32.85C45.79,33.1 45.16,33.63 44.86,34.31L44.69,34.69L44.71,43.08C44.72,47.69 44.75,51.53 44.77,51.61C44.81,51.73 44.79,51.75 44.67,51.7C44.6,51.67 44.28,51.58 43.97,51.49C41.66,50.88 39.02,51.78 37.95,53.56C36.94,55.23 37.56,57.93 39.24,59.21C40.22,59.95 41.49,60.45 43.17,60.74C43.94,60.88 44.46,60.92 45.59,60.92C46.93,60.93 47.07,60.91 47.56,60.74C48.93,60.27 49.9,59.23 50.26,57.84C50.46,57.12 50.46,57.12 50.37,48.7C50.33,44.28 50.33,41.97 50.38,41.97C50.42,41.97 52.38,42.83 54.72,43.89C57.07,44.94 59.67,46.11 60.51,46.48C61.34,46.84 62.57,47.38 63.23,47.68L64.44,48.21L64.5,49.19C64.55,50.12 64.79,60.23 64.76,60.25C64.75,60.25 63.76,60.66 62.55,61.15C61.34,61.65 60.25,62.1 60.13,62.15C59.89,62.26 54.34,64.56 51.18,65.85C46.33,67.84 45.03,68.4 44.64,68.64C43.53,69.31 42.77,70.4 42.7,71.4C42.61,72.68 43.36,73.72 44.9,74.43C45.84,74.87 46.6,75.04 47.64,75.03C48.49,75.03 48.62,75 49.68,74.68C51.22,74.21 59.08,71.88 62.01,71.03C67.8,69.33 67.99,69.26 68.8,68.63C69.52,68.06 70,67.34 70.27,66.46C70.39,66.07 70.4,65.2 70.39,56.22C70.38,50.82 70.35,46.03 70.31,45.58C70.21,44.35 70,43.85 69.24,43.06C68.88,42.69 68.63,42.54 67.17,41.82C65.55,41.02 63.15,39.86 61.83,39.24C61.48,39.07 60.78,38.74 60.28,38.5C59.78,38.26 59.13,37.95 58.84,37.82C58.08,37.45 55.92,36.42 52.03,34.57C50.15,33.68 48.47,32.9 48.29,32.85C47.88,32.72 46.98,32.72 46.58,32.85Z"
+-      android:fillColor="#000000"
+-      android:fillType="evenOdd" />
++    <group
++        android:translateX="-7"
++        android:translateY="-2">
++        <path
++            android:fillColor="#FFFFFFFF"
++            android:pathData="M60,28 L66,28 C67,35 72,39 78,43 C83,46 85,52 83,58 C82,61 80,63 78,64 C80,57 77,51 70,49 L66,48 L66,72 C66,80 58,85 50,85 C42,85 37,80 37,74 C37,67 44,62 52,62 C55,62 58,63 60,64 Z" />
++    </group>
+ </vector>
+diff --git a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/App.kt b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/App.kt
+index 1dba3cac..7f01b410 100644
+--- a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/App.kt
++++ b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/App.kt
+@@ -1,5 +1,8 @@
+ package com.maxrave.simpmusic
+ 
++import com.maxrave.common.PhonkBrand
++import com.maxrave.simpmusic.ui.screen.library.LibraryDynamicPlaylistType
++import com.maxrave.simpmusic.phonk.PhonkFeatures
+ import androidx.compose.animation.AnimatedVisibility
+ import androidx.compose.animation.expandHorizontally
+ import androidx.compose.animation.fadeIn
+@@ -164,7 +167,7 @@ fun App(
+     val isLiquidGlassEnabled by viewModel.getEnableLiquidGlass().collectAsStateWithLifecycle(DataStoreManager.FALSE)
+     // Analytics only makes sense with local tracking on, so its tab follows that setting.
+     val isLocalTrackingEnabled by viewModel.getLocalTrackingEnabled().collectAsStateWithLifecycle(DataStoreManager.FALSE)
+-    val showAnalyticsTab = isLocalTrackingEnabled == TRUE
++    val showAnalyticsTab = PhonkFeatures.STATS && isLocalTrackingEnabled == TRUE
+     // Mix for you comes from the signed-in YouTube account, so its tab follows the session — the
+     // same condition that used to hide the chip inside Library.
+     val isYouTubeLoggedIn by viewModel.getYouTubeLoggedIn().collectAsStateWithLifecycle(DataStoreManager.FALSE)
+@@ -457,6 +460,19 @@ fun App(
+     }
+ 
+     val navBackStackEntry by navController.currentBackStackEntryAsState()
++    // Phonk Hub: the app opens on the Downloads list, once per launch, with Home behind it.
++    var openedStartScreen by rememberSaveable { mutableStateOf(false) }
++    LaunchedEffect(navBackStackEntry) {
++        if (PhonkFeatures.OPEN_ON_DOWNLOADS &&
++            !openedStartScreen &&
++            navBackStackEntry?.destination?.hasRoute(HomeDestination::class) == true
++        ) {
++            openedStartScreen = true
++            navController.navigate(
++                LibraryDynamicPlaylistDestination(type = LibraryDynamicPlaylistType.Downloaded.toStringParams()),
++            )
++        }
++    }
+     LaunchedEffect(navBackStackEntry) {
+         Logger.d("MainActivity", "Current destination: ${navBackStackEntry?.destination?.route}")
+         if (navBackStackEntry?.destination?.route?.contains("FullscreenDestination") == true) {
+@@ -923,7 +939,7 @@ fun App(
+                                 onClick = {
+                                     shouldShowUpdateDialog = false
+                                     viewModel.showedUpdateDialog = false
+-                                    openUrl("https://simpmusic.org/download")
++                                    openUrl(PhonkBrand.RELEASES_PAGE)
+                                 },
+                             ) {
+                                 Text(
+diff --git a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/phonk/PhonkFeatures.kt b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/phonk/PhonkFeatures.kt
+new file mode 100644
+index 00000000..1a3d2456
+--- /dev/null
++++ b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/phonk/PhonkFeatures.kt
+@@ -0,0 +1,31 @@
++/*
++ * Phonk Hub — personal build of SimpMusic (GPL-3.0)
++ */
++
++package com.maxrave.simpmusic.phonk
++
++/**
++ * Switches for SimpMusic features that Phonk Hub hides. Set one to true to bring it back.
++ */
++object PhonkFeatures {
++    /** Analytics tab and listening statistics. */
++    const val STATS = false
++
++    /** Year-in-review reel and monthly recaps. */
++    const val WRAPPED = false
++
++    /** Song recognition with the microphone (Android). */
++    const val RECOGNITION = false
++
++    /** AI provider settings and the AI reading of your taste. */
++    const val AI = false
++
++    /** SimpMusic's own review requests, blog promos and launch banners. */
++    const val PROMOS = false
++
++    /** SimpMusic's check that blocks copies not signed with its release key. */
++    const val SIMPMUSIC_SIGNATURE_CHECK = false
++
++    /** Start on the Downloads list instead of Home. */
++    const val OPEN_ON_DOWNLOADS = true
++}
+diff --git a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/screen/home/HomeScreen.kt b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/screen/home/HomeScreen.kt
+index 6ed66f60..2bf7aee0 100644
+--- a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/screen/home/HomeScreen.kt
++++ b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/screen/home/HomeScreen.kt
+@@ -1,5 +1,6 @@
+ package com.maxrave.simpmusic.ui.screen.home
+ 
++import com.maxrave.simpmusic.phonk.PhonkFeatures
+ import androidx.compose.animation.AnimatedContent
+ import androidx.compose.animation.AnimatedVisibility
+ import androidx.compose.animation.Crossfade
+@@ -506,7 +507,7 @@ fun HomeScreen(
+ //        )
+ //    }
+ 
+-    if (showReviewDialog) {
++    if (PhonkFeatures.PROMOS && showReviewDialog) {
+         ReviewDialog(
+             onDismissRequest = {
+                 sharedViewModel.onDoneReview(
+@@ -523,7 +524,7 @@ fun HomeScreen(
+         )
+     }
+ 
+-    if (showFootgunsDialog) {
++    if (PhonkFeatures.PROMOS && showFootgunsDialog) {
+         FootgunsStarDialog(
+             onDismissRequest = {
+                 // "Later" advances OPEN_APP_TIME, the same way the review and share-lyrics dialogs do.
+@@ -540,7 +541,7 @@ fun HomeScreen(
+         )
+     }
+ 
+-    if (showBlogPromoDialog) {
++    if (PhonkFeatures.PROMOS && showBlogPromoDialog) {
+         BlogPromoDialog(
+             onDismissRequest = {
+                 sharedViewModel.putString(BLOG_PROMO_KEY, "true")
+@@ -577,7 +578,7 @@ fun HomeScreen(
+     // started at launch, however long that takes, so an update dialog comes first. Then it takes the
+     // first banner this version has not shown yet.
+     LaunchedEffect(Unit) {
+-        if (promoLaunchDecided) return@LaunchedEffect
++        if (promoLaunchDecided || !PhonkFeatures.PROMOS) return@LaunchedEffect
+         // Marked at the start, not the end: leaving Home cancels this for good (by then the user is
+         // busy elsewhere), and a value written while Home is being left would not be saved.
+         promoLaunchDecided = true
+diff --git a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/screen/home/SettingScreen.kt b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/screen/home/SettingScreen.kt
+index f5de7582..ad30fa04 100644
+--- a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/screen/home/SettingScreen.kt
++++ b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/screen/home/SettingScreen.kt
+@@ -1,5 +1,6 @@
+ package com.maxrave.simpmusic.ui.screen.home
+ 
++import com.maxrave.simpmusic.phonk.PhonkFeatures
+ import androidx.compose.animation.AnimatedVisibility
+ import androidx.compose.animation.Crossfade
+ import androidx.compose.animation.fadeIn
+@@ -1873,7 +1874,7 @@ fun SettingScreen(
+                 )
+             }
+         }
+-        item(key = "AI") {
++        if (PhonkFeatures.AI) item(key = "AI") {
+             SettingGroup(title = stringResource(Res.string.ai)) {
+                 SettingItem(
+                     title = stringResource(Res.string.ai_provider),
+diff --git a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/screen/library/LibraryScreen.kt b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/screen/library/LibraryScreen.kt
+index 6380241e..36f68abf 100644
+--- a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/screen/library/LibraryScreen.kt
++++ b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/screen/library/LibraryScreen.kt
+@@ -1,5 +1,6 @@
+ package com.maxrave.simpmusic.ui.screen.library
+ 
++import com.maxrave.simpmusic.phonk.PhonkFeatures
+ import androidx.compose.animation.AnimatedVisibility
+ import androidx.compose.animation.Crossfade
+ import androidx.compose.animation.expandHorizontally
+@@ -284,7 +285,7 @@ fun LibraryScreen(
+ 
+                         // The reading is drawn from playback_event, so the card follows the same
+                         // setting the Wrapped chip and the Analytics tab do.
+-                        if (localTrackingEnabled) {
++                        if (PhonkFeatures.AI && localTrackingEnabled) {
+                             item(key = "taste") {
+                                 val tasteState by tasteViewModel.uiState.collectAsStateWithLifecycle()
+                                 if (tasteState != TasteUiState.Hidden) {
+@@ -524,7 +525,7 @@ fun LibraryScreen(
+                 }
+                 // Nothing to recap without the plays — gated exactly as the YouTube chip above
+                 // is gated on being logged in.
+-                if (type == LibraryChipType.WRAPPED && !localTrackingEnabled) {
++                if (type == LibraryChipType.WRAPPED && (!PhonkFeatures.WRAPPED || !localTrackingEnabled)) {
+                     return@forEach
+                 }
+                 Chip(
+diff --git a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/screen/other/SearchScreen.kt b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/screen/other/SearchScreen.kt
+index c73e98f5..60fef57e 100644
+--- a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/screen/other/SearchScreen.kt
++++ b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/screen/other/SearchScreen.kt
+@@ -1,5 +1,6 @@
+ package com.maxrave.simpmusic.ui.screen.other
+ 
++import com.maxrave.simpmusic.phonk.PhonkFeatures
+ import androidx.compose.animation.AnimatedContent
+ import androidx.compose.animation.AnimatedVisibility
+ import androidx.compose.animation.Crossfade
+@@ -1166,7 +1167,7 @@ fun SearchScreen(
+                                     contentDescription = "Clear search",
+                                 )
+                             }
+-                        } else if (getPlatform() == Platform.Android) {
++                        } else if (PhonkFeatures.RECOGNITION && getPlatform() == Platform.Android) {
+                             // An empty field offers song recognition instead (Android only).
+                             IconButton(
+                                 modifier = Modifier.clip(CircleShape),
+diff --git a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/theme/Color.kt b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/theme/Color.kt
+index 812bd7cc..7ad37244 100644
+--- a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/theme/Color.kt
++++ b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/theme/Color.kt
+@@ -8,7 +8,8 @@ import androidx.compose.ui.graphics.Color
+  * Brand seed color. The whole Material 3 ColorScheme is generated from this
+  * color at runtime — see [AppTheme].
+  */
+-val seed = Color(0xFF8ECAE6)
++// Phonk Hub: orange accent (was 0xFF8ECAE6)
++val seed = Color(0xFFFF9900)
+ 
+ // ===== Semantic colors (not derivable from the color scheme) =====
+ 
+@@ -16,7 +17,7 @@ val seed = Color(0xFF8ECAE6)
+ val favoriteColor = Color(0xFFFF4081)
+ 
+ /** Currently playing lyric line. */
+-val lyricActiveColor = Color(0xFFFFFF00)
++val lyricActiveColor = Color(0xFFFF9900)
+ 
+ val shimmerBackground = Color(0x7E383737)
+ val shimmerLine = Color(0xFF4D4848)
+diff --git a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/theme/PhonkPalette.kt b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/theme/PhonkPalette.kt
+new file mode 100644
+index 00000000..b74a6848
+--- /dev/null
++++ b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/theme/PhonkPalette.kt
+@@ -0,0 +1,72 @@
++/*
++ * Phonk Hub — personal build of SimpMusic (GPL-3.0)
++ */
++
++package com.maxrave.simpmusic.ui.theme
++
++import androidx.compose.material3.ColorScheme
++import androidx.compose.ui.graphics.Color
++import androidx.compose.ui.graphics.lerp
++import androidx.compose.ui.graphics.luminance
++
++/**
++ * Phonk Hub's fixed palette: black background, orange for everything you can tap, white text.
++ * The accent follows the theme colour setting, so choosing a custom colour in Settings replaces
++ * the orange and keeps the black and white.
++ */
++object PhonkPalette {
++    val Accent = Color(0xFFFF9900)
++    val DarkBackground = Color(0xFF000000)
++    val DarkText = Color(0xFFFFFFFF)
++    val LightBackground = Color(0xFFFFFFFF)
++    val LightText = Color(0xFF000000)
++}
++
++/**
++ * Rewrites [base] so that every role maps onto three colours. Surfaces step from [background]
++ * towards [text], so raised panels stay distinguishable without introducing new hues.
++ */
++fun phonkColorScheme(
++    base: ColorScheme,
++    accent: Color,
++    background: Color,
++    text: Color,
++): ColorScheme {
++    fun towardsText(fraction: Float) = lerp(background, text, fraction)
++
++    fun towardsAccent(fraction: Float) = lerp(background, accent, fraction)
++    val onAccent = if (accent.luminance() > 0.4f) Color.Black else Color.White
++    return base.copy(
++        primary = accent,
++        onPrimary = onAccent,
++        primaryContainer = towardsAccent(0.35f),
++        onPrimaryContainer = text,
++        inversePrimary = accent,
++        secondary = accent,
++        onSecondary = onAccent,
++        secondaryContainer = towardsAccent(0.25f),
++        onSecondaryContainer = text,
++        tertiary = accent,
++        onTertiary = onAccent,
++        tertiaryContainer = towardsAccent(0.25f),
++        onTertiaryContainer = text,
++        background = background,
++        onBackground = text,
++        surface = background,
++        onSurface = text,
++        surfaceVariant = towardsText(0.12f),
++        onSurfaceVariant = towardsText(0.72f),
++        surfaceTint = accent,
++        surfaceBright = towardsText(0.16f),
++        surfaceDim = background,
++        surfaceContainerLowest = background,
++        surfaceContainerLow = towardsText(0.04f),
++        surfaceContainer = towardsText(0.07f),
++        surfaceContainerHigh = towardsText(0.10f),
++        surfaceContainerHighest = towardsText(0.14f),
++        outline = towardsText(0.38f),
++        outlineVariant = towardsText(0.16f),
++        inverseSurface = text,
++        inverseOnSurface = background,
++    )
++}
+diff --git a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/theme/Theme.kt b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/theme/Theme.kt
+index 3cc8b92f..d3d8a8b7 100644
+--- a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/theme/Theme.kt
++++ b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/theme/Theme.kt
+@@ -141,13 +141,20 @@ fun AppTheme(
+         }
+     // Light pins the neutrals to a neutral-grey ramp (the seed otherwise tints them warm/cream);
+     // dark keeps the generated neutrals as they are.
++    // Phonk Hub: the generated scheme is rewritten onto black, the accent and white.
+     val colorScheme =
+         wallpaperScheme
+             ?: rememberDynamicColorScheme(
+                 seedColor = seedColor,
+                 isDark = isDark,
+                 style = PaletteStyle.TonalSpot,
+-                modifyColorScheme = { cs -> if (isDark) cs else cs.withNeutralLightSurfaces() },
++                modifyColorScheme = { cs ->
++                    if (isDark) {
++                        phonkColorScheme(cs, seedColor, PhonkPalette.DarkBackground, PhonkPalette.DarkText)
++                    } else {
++                        phonkColorScheme(cs, seedColor, PhonkPalette.LightBackground, PhonkPalette.LightText)
++                    }
++                },
+             )
+     // Immersive screens stay dark even at light theme (see [ForceDarkContent]). Resolve their scheme
+     // once here instead of letting every such subtree build a palette of its own.
+@@ -159,6 +166,9 @@ fun AppTheme(
+                 seedColor = seedColor,
+                 isDark = true,
+                 style = PaletteStyle.TonalSpot,
++                modifyColorScheme = { cs ->
++                    phonkColorScheme(cs, seedColor, PhonkPalette.DarkBackground, PhonkPalette.DarkText)
++                },
+             )
+         }
+     SystemBarAppearanceEffect(isDark)
+diff --git a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/utils/AppLinks.kt b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/utils/AppLinks.kt
+index 09db55f5..53f5b271 100644
+--- a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/utils/AppLinks.kt
++++ b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/utils/AppLinks.kt
+@@ -1,5 +1,6 @@
+ package com.maxrave.simpmusic.utils
+ 
++import com.maxrave.simpmusic.phonk.PhonkFeatures
+ import com.eygraber.uri.Uri
+ import com.maxrave.common.LibraryChipType
+ import com.maxrave.simpmusic.Platform
+@@ -24,9 +25,10 @@ fun isAppLinkAvailable(
+ ): Boolean =
+     when {
+         appPath !in APP_LINK_PATHS -> false
+-        appPath == "analytics" || appPath == "taste" -> localTrackingOn
+-        appPath == "recognize" -> getPlatform() == Platform.Android
+-        appPath == "library" && libraryTab == LibraryChipType.WRAPPED -> localTrackingOn
++        appPath == "analytics" -> PhonkFeatures.STATS && localTrackingOn
++        appPath == "taste" -> PhonkFeatures.AI && localTrackingOn
++        appPath == "recognize" -> PhonkFeatures.RECOGNITION && getPlatform() == Platform.Android
++        appPath == "library" && libraryTab == LibraryChipType.WRAPPED -> PhonkFeatures.WRAPPED && localTrackingOn
+         appPath == "library" && libraryTab == LibraryChipType.YOUTUBE_MUSIC_PLAYLIST -> youTubeLoggedIn
+         else -> true
+     }
+diff --git a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/viewModel/SharedViewModel.kt b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/viewModel/SharedViewModel.kt
+index 4dd5884e..dd35b8b0 100644
+--- a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/viewModel/SharedViewModel.kt
++++ b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/viewModel/SharedViewModel.kt
+@@ -1,5 +1,6 @@
+ package com.maxrave.simpmusic.viewModel
+ 
++import com.maxrave.simpmusic.phonk.PhonkFeatures
+ import androidx.compose.ui.graphics.ImageBitmap
+ import androidx.lifecycle.viewModelScope
+ import com.maxrave.common.AppIdentity
+@@ -1301,6 +1302,9 @@ class SharedViewModel(
+         packageName: String,
+         signingCerts: List<String>,
+     ) {
++        // Phonk Hub is signed with its own key and has its own package name, so SimpMusic's
++        // check against its release key would block it. The build is always treated as official.
++        if (!PhonkFeatures.SIMPMUSIC_SIGNATURE_CHECK) return
+         if (packageName !in Config.OFFICIAL_PACKAGE_NAMES) {
+             _isOfficialBuild.value = false
+             return
+diff --git a/composeApp/src/jvmMain/kotlin/com/maxrave/simpmusic/DesktopApp.kt b/composeApp/src/jvmMain/kotlin/com/maxrave/simpmusic/DesktopApp.kt
+index c3638644..5391f470 100644
+--- a/composeApp/src/jvmMain/kotlin/com/maxrave/simpmusic/DesktopApp.kt
++++ b/composeApp/src/jvmMain/kotlin/com/maxrave/simpmusic/DesktopApp.kt
+@@ -183,7 +183,7 @@ fun runDesktopApp(args: Array<String> = emptyArray()) {
+         return
+     }
+     // Past the guard on purpose: a second instance must not open the same log files.
+-    Logger.enableFileLogging(getHomeFolderPath(listOf(".simpmusic", "logs")))
++    Logger.enableFileLogging(getHomeFolderPath(listOf(".phonkhub", "logs")))
+ 
+     // First instance only: deliver our own deep link (non-macOS passes URI via args).
+     if (!isMacOS) {
+@@ -197,7 +197,7 @@ fun runDesktopApp(args: Array<String> = emptyArray()) {
+     startKoin {
+         loadAllModules(
+             AppIdentity(
+-                applicationId = "com.maxrave.simpmusic",
++                applicationId = "com.phonkhub.app",
+                 versionName = BuildKonfig.versionName,
+                 platform = "${System.getProperty("os.name")} ${System.getProperty("os.version")}",
+                 // Set by desktopApp's JavaExec tasks (run, hotRunJvm); a packaged install never has it.
+diff --git a/composeApp/src/jvmMain/kotlin/com/maxrave/simpmusic/viewModel/SettingsViewModel.jvm.kt b/composeApp/src/jvmMain/kotlin/com/maxrave/simpmusic/viewModel/SettingsViewModel.jvm.kt
+index ecac7583..4c8bb60f 100644
+--- a/composeApp/src/jvmMain/kotlin/com/maxrave/simpmusic/viewModel/SettingsViewModel.jvm.kt
++++ b/composeApp/src/jvmMain/kotlin/com/maxrave/simpmusic/viewModel/SettingsViewModel.jvm.kt
+@@ -47,7 +47,7 @@ actual suspend fun restoreNative(
+             Logger.d("BackupRestore", "Processing entry: ${entry.name}")
+             when {
+                 entry.name == "$SETTINGS_FILENAME.preferences_pb" -> {
+-                    File(getHomeFolderPath(listOf(".simpmusic")), "$SETTINGS_FILENAME.preferences_pb")
++                    File(getHomeFolderPath(listOf(".phonkhub")), "$SETTINGS_FILENAME.preferences_pb")
+                         .outputStream()
+                         .use { outputStream ->
+                             inputStream.copyTo(outputStream)
+@@ -82,7 +82,7 @@ actual suspend fun backupNative(
+ ) {
+     FileOutputStream(File(uri.toString())).use {
+         it.buffered().zipOutputStream().use { outputStream ->
+-            File(getHomeFolderPath(listOf(".simpmusic")), "$SETTINGS_FILENAME.preferences_pb")
++            File(getHomeFolderPath(listOf(".phonkhub")), "$SETTINGS_FILENAME.preferences_pb")
+                 .inputStream()
+                 .buffered()
+                 .use { inputStream ->
+diff --git a/desktopApp/build.gradle.kts b/desktopApp/build.gradle.kts
+index d0827d30..1a82a210 100644
+--- a/desktopApp/build.gradle.kts
++++ b/desktopApp/build.gradle.kts
+@@ -167,7 +167,9 @@ compose.desktop {
+             }
+             targetFormats(*listTarget.toTypedArray())
+             modules("jdk.unsupported")
+-            packageName = "SimpMusic"
++            // Phonk Hub: written from marca/nombre.txt by phonk/aplicar_marca.py
++            packageName = "PhonkHub"
++            vendor = "Phonk Hub"
+             macOS {
+                 val formatedDate =
+                     Instant.now().let {
+@@ -209,6 +211,13 @@ compose.desktop {
+             }
+             windows {
+                 includeAllModules = true
++                // Phonk Hub: a fixed upgrade code lets a new installer replace the installed version.
++                upgradeUuid = "8b075256-3c2a-57e7-82cd-497563a1e961"
++                menuGroup = "Phonk Hub"
++                shortcut = true
++                menu = true
++                perUserInstall = true
++                dirChooser = true
+                 packageVersion =
+                     libs.versions.version.name
+                         .get()

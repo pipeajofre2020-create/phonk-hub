@@ -1,0 +1,256 @@
+diff --git a/common/src/commonMain/kotlin/com/maxrave/common/Config.kt b/common/src/commonMain/kotlin/com/maxrave/common/Config.kt
+index e52f961..b3e9e20 100644
+--- a/common/src/commonMain/kotlin/com/maxrave/common/Config.kt
++++ b/common/src/commonMain/kotlin/com/maxrave/common/Config.kt
+@@ -16,6 +16,7 @@ object Config {
+     val OFFICIAL_PACKAGE_NAMES =
+         setOf(
+             "com.maxrave.simpmusic",
++            "com.phonkhub.app",
+             "com.maxrave.simpmusic.dev",
+             "com.spotify.music",
+         )
+diff --git a/common/src/commonMain/kotlin/com/maxrave/common/PhonkBrand.kt b/common/src/commonMain/kotlin/com/maxrave/common/PhonkBrand.kt
+new file mode 100644
+index 0000000..aab8267
+--- /dev/null
++++ b/common/src/commonMain/kotlin/com/maxrave/common/PhonkBrand.kt
+@@ -0,0 +1,21 @@
++/*
++ * Phonk Hub — personal build of SimpMusic (GPL-3.0)
++ */
++
++package com.maxrave.common
++
++/**
++ * Phonk Hub's identity. `phonk/aplicar_marca.py` rewrites NAME from `marca/nombre.txt` and REPO from
++ * the GitHub repository that runs the build, so these values are only the defaults.
++ */
++object PhonkBrand {
++    /** The app's name, as shown in the window title, the Music folder and notifications. */
++    const val NAME = "Phonk Hub"
++
++    /** "owner/repository" on GitHub whose releases carry new versions. Empty: no update check. */
++    const val REPO = ""
++
++    /** Page where a new version can be downloaded. */
++    val RELEASES_PAGE: String
++        get() = if (REPO.isBlank()) "https://github.com" else "https://github.com/$REPO/releases/latest"
++}
+diff --git a/data/src/commonMain/kotlin/com/maxrave/data/dataStore/DataStoreManagerImpl.kt b/data/src/commonMain/kotlin/com/maxrave/data/dataStore/DataStoreManagerImpl.kt
+index 8258903..6a59cab 100644
+--- a/data/src/commonMain/kotlin/com/maxrave/data/dataStore/DataStoreManagerImpl.kt
++++ b/data/src/commonMain/kotlin/com/maxrave/data/dataStore/DataStoreManagerImpl.kt
+@@ -151,7 +151,7 @@ internal class DataStoreManagerImpl(
+ 
+     override val downloadQuality: Flow<String> =
+         settingsDataStore.data.map { preferences ->
+-            preferences[DOWNLOAD_QUALITY] ?: COMMON_QUALITY.items[0].toString()
++            preferences[DOWNLOAD_QUALITY] ?: COMMON_QUALITY.items[1].toString() // Phonk Hub: balanced
+         }
+ 
+     override suspend fun setDownloadQuality(quality: String) {
+@@ -979,7 +979,7 @@ internal class DataStoreManagerImpl(
+ 
+     override val nowPlayingStyle =
+         settingsDataStore.data.map { preferences ->
+-            preferences[NOW_PLAYING_STYLE] ?: DataStoreManager.NOW_PLAYING_STYLE_SPOTIFY
++            preferences[NOW_PLAYING_STYLE] ?: DataStoreManager.NOW_PLAYING_STYLE_APPLE_MUSIC // Phonk Hub
+         }
+ 
+     override suspend fun setNowPlayingStyle(style: String) {
+@@ -992,7 +992,7 @@ internal class DataStoreManagerImpl(
+ 
+     override val lyricsStyle =
+         settingsDataStore.data.map { preferences ->
+-            preferences[LYRICS_STYLE] ?: DataStoreManager.LYRICS_STYLE_CLASSIC
++            preferences[LYRICS_STYLE] ?: DataStoreManager.LYRICS_STYLE_APPLE_MUSIC // Phonk Hub
+         }
+ 
+     override suspend fun setLyricsStyle(style: String) {
+@@ -1488,7 +1488,7 @@ internal class DataStoreManagerImpl(
+     // Defaults to FALSE: it spends storage and mobile data on the user's behalf.
+     override val autoDownloadLikedSongs: Flow<String> =
+         settingsDataStore.data.map { preferences ->
+-            preferences[AUTO_DOWNLOAD_LIKED_SONGS] ?: FALSE
++            preferences[AUTO_DOWNLOAD_LIKED_SONGS] ?: TRUE // Phonk Hub
+         }
+ 
+     override suspend fun setAutoDownloadLikedSongs(enabled: Boolean) {
+@@ -1502,7 +1502,7 @@ internal class DataStoreManagerImpl(
+     // Defaults to FALSE for the same reason as autoDownloadLikedSongs.
+     override val smartDownloadsEnabled: Flow<String> =
+         settingsDataStore.data.map { preferences ->
+-            preferences[SMART_DOWNLOADS_ENABLED] ?: FALSE
++            preferences[SMART_DOWNLOADS_ENABLED] ?: TRUE // Phonk Hub: 50 most played
+         }
+ 
+     override suspend fun setSmartDownloadsEnabled(enabled: Boolean) {
+@@ -1778,7 +1778,7 @@ internal class DataStoreManagerImpl(
+ 
+     override val localTrackingEnabled: Flow<String> =
+         settingsDataStore.data.map { preferences ->
+-            preferences[LOCAL_TRACKING_ENABLED] ?: FALSE
++            preferences[LOCAL_TRACKING_ENABLED] ?: TRUE // Phonk Hub: smart downloads need it
+         }
+ 
+     override suspend fun setLocalTrackingEnabled(enabled: Boolean) {
+diff --git a/data/src/jvmMain/kotlin/com/maxrave/data/dataStore/DataStoreManagerImpl.jvm.kt b/data/src/jvmMain/kotlin/com/maxrave/data/dataStore/DataStoreManagerImpl.jvm.kt
+index 68b9a89..d1b7812 100644
+--- a/data/src/jvmMain/kotlin/com/maxrave/data/dataStore/DataStoreManagerImpl.jvm.kt
++++ b/data/src/jvmMain/kotlin/com/maxrave/data/dataStore/DataStoreManagerImpl.jvm.kt
+@@ -20,7 +20,7 @@ actual fun createDataStoreInstance(): DataStore<Preferences> =
+         storage =
+             ReadsWaitForWritesStorage(
+                 FileStorage(PreferencesFileSerializer) {
+-                    File(getHomeFolderPath(listOf(".simpmusic")), "$SETTINGS_FILENAME.preferences_pb").absoluteFile
++                    File(getHomeFolderPath(listOf(".phonkhub")), "$SETTINGS_FILENAME.preferences_pb").absoluteFile
+                 },
+             ),
+     )
+diff --git a/data/src/jvmMain/kotlin/com/maxrave/data/db/MusicDatabase.jvm.kt b/data/src/jvmMain/kotlin/com/maxrave/data/db/MusicDatabase.jvm.kt
+index ec11375..99e76b3 100644
+--- a/data/src/jvmMain/kotlin/com/maxrave/data/db/MusicDatabase.jvm.kt
++++ b/data/src/jvmMain/kotlin/com/maxrave/data/db/MusicDatabase.jvm.kt
+@@ -15,6 +15,6 @@ actual fun getDatabaseBuilder(
+ }
+ 
+ actual fun getDatabasePath(): String {
+-    val dbFile = File(getHomeFolderPath(listOf(".simpmusic", "db")), DB_NAME)
++    val dbFile = File(getHomeFolderPath(listOf(".phonkhub", "db")), DB_NAME)
+     return dbFile.absolutePath
+ }
+\ No newline at end of file
+diff --git a/data/src/jvmMain/kotlin/com/maxrave/data/io/ExpectFileSystem.jvm.kt b/data/src/jvmMain/kotlin/com/maxrave/data/io/ExpectFileSystem.jvm.kt
+index 7804286..e3b59a2 100644
+--- a/data/src/jvmMain/kotlin/com/maxrave/data/io/ExpectFileSystem.jvm.kt
++++ b/data/src/jvmMain/kotlin/com/maxrave/data/io/ExpectFileSystem.jvm.kt
+@@ -8,4 +8,4 @@ actual fun fileSystem(): FileSystem {
+     return FileSystem.SYSTEM
+ }
+ 
+-actual fun fileDir(): String = File(getHomeFolderPath(listOf(".simpmusic"))).absolutePath
+\ No newline at end of file
++actual fun fileDir(): String = File(getHomeFolderPath(listOf(".phonkhub"))).absolutePath
+\ No newline at end of file
+diff --git a/media/media-jvm/src/main/java/com/simpmusic/media_jvm/audio/ReverbIrFiles.kt b/media/media-jvm/src/main/java/com/simpmusic/media_jvm/audio/ReverbIrFiles.kt
+index 80d3680..26eee7c 100644
+--- a/media/media-jvm/src/main/java/com/simpmusic/media_jvm/audio/ReverbIrFiles.kt
++++ b/media/media-jvm/src/main/java/com/simpmusic/media_jvm/audio/ReverbIrFiles.kt
+@@ -136,7 +136,7 @@ private fun moveIntoPlace(
+ }
+ 
+ private fun reverbFolderPath(): String =
+-    System.getProperty("user.home") + File.separator + ".simpmusic" + File.separator + "reverb"
++    System.getProperty("user.home") + File.separator + ".phonkhub" + File.separator + "reverb"
+ 
+ /**
+  * The exact length [floatWav] produces for [preset], and so the only length a healthy cache file
+diff --git a/media/media-jvm/src/main/java/com/simpmusic/media_jvm/download/DownloadUtils.kt b/media/media-jvm/src/main/java/com/simpmusic/media_jvm/download/DownloadUtils.kt
+index e3ce115..eef85f7 100644
+--- a/media/media-jvm/src/main/java/com/simpmusic/media_jvm/download/DownloadUtils.kt
++++ b/media/media-jvm/src/main/java/com/simpmusic/media_jvm/download/DownloadUtils.kt
+@@ -1,5 +1,6 @@
+ package com.simpmusic.media_jvm.download
+ 
++import com.maxrave.common.PhonkBrand
+ import com.maxrave.common.MERGING_DATA_TYPE
+ import com.maxrave.domain.data.entities.DownloadState
+ import com.maxrave.domain.manager.DataStoreManager
+@@ -96,7 +97,7 @@ internal class DownloadUtils(
+             songRepository
+                 .downloadToFile(
+                     song.toTrack(),
+-                    path = getDownloadPath() + File.separator + videoId,
++                    path = getDownloadPath() + File.separator + downloadFileBase(song.title, song.artistName, videoId),
+                     videoId = videoId,
+                     isVideo = false,
+                 ).collect { state ->
+@@ -206,18 +207,46 @@ internal class DownloadUtils(
+ 
+     override fun removeAllDownloads() {
+         _downloadTask.value = emptyMap()
+-        File(getDownloadPath()).listFiles().forEach {
++        // Phonk Hub: the folder is the user's Music folder, so only files this app wrote are touched.
++        File(getDownloadPath()).listFiles()?.forEach {
++            val videoId = downloadedVideoIdOf(it.name) ?: return@forEach
+             it.delete()
+             coroutineScope.launch {
+-                songRepository.updateDownloadState(
+-                    it.name.split(".").first().removePrefix(
+-                        MERGING_DATA_TYPE.VIDEO,
+-                    ),
+-                    DownloadState.STATE_NOT_DOWNLOADED,
+-                )
++                songRepository.updateDownloadState(videoId, DownloadState.STATE_NOT_DOWNLOADED)
+             }
+         }
+     }
+ }
+ 
+-fun getDownloadPath(): String = System.getProperty("user.home") + File.separator + ".simpmusic" + File.separator + "downloads"
++/**
++ * Phonk Hub: "Artist - Title [videoId]", so the files read well in the Music folder and other players,
++ * while every lookup still finds them by the id inside the brackets.
++ */
++internal fun downloadFileBase(
++    title: String,
++    artists: List<String>?,
++    videoId: String,
++): String {
++    val artist = artists?.filter { it.isNotBlank() }?.joinToString(", ").orEmpty()
++    val label = if (artist.isBlank()) title else "$artist - $title"
++    val safe =
++        label
++            .replace(Regex("[\\\\/:*?\"<>|\\p{Cntrl}]"), " ")
++            .replace(Regex("\\s+"), " ")
++            .trim()
++            .trimEnd('.')
++            .take(120)
++            .trim()
++    return if (safe.isEmpty()) videoId else "$safe [$videoId]"
++}
++
++/** The video id a download was saved under, or null for a file this app did not write. */
++internal fun downloadedVideoIdOf(fileName: String): String? {
++    val base = fileName.substringBeforeLast('.')
++    Regex("\\[([^\\[\\]]+)]$").find(base)?.let { return it.groupValues[1].removePrefix(MERGING_DATA_TYPE.VIDEO) }
++    // Files written before Phonk Hub named them: the bare id.
++    return base.removePrefix(MERGING_DATA_TYPE.VIDEO).takeIf { Regex("[A-Za-z0-9_-]{11}").matches(it) }
++}
++
++// Phonk Hub: downloads live in the user's Music folder, under the app's name.
++fun getDownloadPath(): String = System.getProperty("user.home") + File.separator + "Music" + File.separator + PhonkBrand.NAME
+diff --git a/media/media-jvm/src/main/java/com/simpmusic/media_jvm/mpv/MpvWaveformReader.kt b/media/media-jvm/src/main/java/com/simpmusic/media_jvm/mpv/MpvWaveformReader.kt
+index eb3be5a..3e4bc55 100644
+--- a/media/media-jvm/src/main/java/com/simpmusic/media_jvm/mpv/MpvWaveformReader.kt
++++ b/media/media-jvm/src/main/java/com/simpmusic/media_jvm/mpv/MpvWaveformReader.kt
+@@ -53,7 +53,7 @@ internal object MpvWaveformReader {
+     private val UNSAFE_FILE_CHARS = Regex("[^A-Za-z0-9_-]")
+ 
+     private val dir: File by lazy {
+-        File(System.getProperty("user.home"), ".simpmusic" + File.separator + "waveforms").apply { mkdirs() }
++        File(System.getProperty("user.home"), ".phonkhub" + File.separator + "waveforms").apply { mkdirs() }
+     }
+ 
+     /**
+diff --git a/service/kotlinYtmusicScraper/src/commonMain/kotlin/com/maxrave/kotlinytmusicscraper/Ytmusic.kt b/service/kotlinYtmusicScraper/src/commonMain/kotlin/com/maxrave/kotlinytmusicscraper/Ytmusic.kt
+index 07965f8..2a6d855 100644
+--- a/service/kotlinYtmusicScraper/src/commonMain/kotlin/com/maxrave/kotlinytmusicscraper/Ytmusic.kt
++++ b/service/kotlinYtmusicScraper/src/commonMain/kotlin/com/maxrave/kotlinytmusicscraper/Ytmusic.kt
+@@ -1,5 +1,6 @@
+ package com.maxrave.kotlinytmusicscraper
+ 
++import com.maxrave.common.PhonkBrand
+ import com.maxrave.domain.extension.now
+ import com.maxrave.kotlinytmusicscraper.extractor.Extractor
+ import com.maxrave.kotlinytmusicscraper.models.Context
+@@ -718,7 +719,7 @@ class Ytmusic {
+         }
+ 
+     suspend fun checkForGithubReleaseUpdate() =
+-        httpClient.get("https://api.github.com/repos/maxrave-dev/SimpMusic/releases/latest") {
++        httpClient.get("https://api.github.com/repos/${PhonkBrand.REPO}/releases/latest") {
+             contentType(ContentType.Application.Json)
+         }
+ 
