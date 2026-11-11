@@ -1,0 +1,140 @@
+# Phonk Hub: compila la app del teléfono (.apk) y del PC (.msi) y las publica como una versión nueva.
+# Se ejecuta al subir cambios a "main" o a mano desde la pestaña Actions.
+name: Compilar Phonk Hub
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+
+permissions:
+  contents: write
+
+env:
+  BUILD_NUMBER: ${{ github.run_number }}
+
+jobs:
+  android:
+    name: Teléfono (Android)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: "microsoft"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Preparar el código
+        run: |
+          pip install --quiet pillow
+          bash phonk/preparar.sh app "$BUILD_NUMBER"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Compilar
+        working-directory: app
+        run: |
+          ./gradlew --no-configuration-cache exportLibraryDefinitions
+          ./gradlew --no-configuration-cache :androidApp:assembleRelease
+
+      - name: Firmar
+        env:
+          PHONK_KEYSTORE: ${{ secrets.PHONK_KEYSTORE }}
+        run: |
+          if [ -n "$PHONK_KEYSTORE" ]; then
+            echo "$PHONK_KEYSTORE" | base64 -d > phonk.keystore
+          else
+            echo "::warning::No encontré el secreto PHONK_KEYSTORE. Uso una llave temporal: para instalar la próxima versión tendrás que desinstalar esta primero."
+            keytool -genkeypair -keystore phonk.keystore -storepass phonkhub -keypass phonkhub \
+              -alias phonk -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Phonk Hub"
+          fi
+          BUILD_TOOLS=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          UNSIGNED=$(ls app/androidApp/build/outputs/apk/release/*universal*unsigned*.apk | head -1)
+          "$BUILD_TOOLS/zipalign" -p -f 4 "$UNSIGNED" aligned.apk
+          "$BUILD_TOOLS/apksigner" sign --ks phonk.keystore --ks-pass pass:phonkhub --key-pass pass:phonkhub \
+            --ks-key-alias phonk --out PhonkHub.apk aligned.apk
+          "$BUILD_TOOLS/apksigner" verify PhonkHub.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PhonkHub-Android
+          path: PhonkHub.apk
+
+  windows:
+    name: PC (Windows)
+    runs-on: windows-latest
+    timeout-minutes: 120
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Mantener los finales de línea
+        run: git config --global core.autocrlf false
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: "microsoft"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Preparar el código
+        run: |
+          pip install --quiet pillow
+          bash phonk/preparar.sh app "$BUILD_NUMBER"
+
+      - name: Descargar el reproductor (libmpv)
+        working-directory: app
+        run: |
+          TAG=$(sed -n 's/.*val mpvNativesTag = "\([^"]*\)".*/\1/p' composeApp/build.gradle.kts)
+          SUM=$(sed -n 's/.*"windows-x64" to "\([0-9a-f]\{64\}\)".*/\1/p' composeApp/build.gradle.kts)
+          mkdir -p mpv-natives
+          curl -fsSL -o mpv-win.tar.gz \
+            "https://github.com/maxrave-dev/simpmusic-files/releases/download/$TAG/mpv-natives-windows-x64.tar.gz"
+          echo "$SUM  mpv-win.tar.gz" | sha256sum -c -
+          tar -xzf mpv-win.tar.gz -C mpv-natives
+          ls mpv-natives/windows-x64
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Compilar el instalador
+        working-directory: app
+        run: |
+          ./gradlew --no-configuration-cache exportLibraryDefinitions
+          ./gradlew --no-configuration-cache :desktopApp:packageMsi
+          mkdir -p ../salida
+          cp desktopApp/build/compose/binaries/main/msi/*.msi ../salida/PhonkHub.msi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PhonkHub-Windows
+          path: salida/PhonkHub.msi
+
+  publicar:
+    name: Publicar versión
+    needs: [android, windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: salida
+          merge-multiple: true
+
+      - name: Crear la versión en GitHub
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v1.0.$BUILD_NUMBER" salida/PhonkHub.apk salida/PhonkHub.msi \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Phonk Hub 1.0.$BUILD_NUMBER" \
+            --notes "Compilación automática número $BUILD_NUMBER. Teléfono: PhonkHub.apk · PC: PhonkHub.msi"
